@@ -55,7 +55,7 @@
 
 (search-for-primes 1000 1019)
 (search-for-primes 10000 10037)
-(search-for-primes 100000 100019)
+(search-for-primes 100000 100043)
 (search-for-primes 1000000 1000037)
 
 ; The timings reflect the square root 10 order of growth.
