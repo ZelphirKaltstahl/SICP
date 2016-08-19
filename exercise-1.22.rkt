@@ -1,7 +1,7 @@
 #lang racket
 ;; needed for compatibility reasons
-(#%require (only racket/base current-milliseconds))
-(define (runtime) (current-milliseconds))
+(#%require (only racket/base current-inexact-milliseconds))
+(define (runtime) (current-inexact-milliseconds))
 
 
 ;; basic function
@@ -9,6 +9,8 @@
 
 (define (divides? a b)
   (= (remainder b a) 0))
+
+(define (even? n) (divides? 2 n))
 
 ;; exact prime number test
 (define (prime? n)
@@ -40,6 +42,28 @@
   (display elapsed-time))
 
 ;; test
-(timed-prime-test 243312543675863)
-(newline)
-(prime? 243312543675863)
+;(timed-prime-test 243312543675863)
+;(newline)
+;(prime? 243312543675863)
+
+(define (search-for-primes min max)
+  (cond
+    ((even? min) (search-for-primes (+ min 1) max))  ; start with an odd minimum number
+    ((not (> min max)) (begin
+                  (timed-prime-test min)
+                  (search-for-primes (+ min 2) max)))))
+
+(search-for-primes 1000 1019)
+(search-for-primes 10000 10037)
+(search-for-primes 100000 100019)
+(search-for-primes 1000000 1000037)
+
+; The timings reflect the square root 10 order of growth.
+
+; Square root of 10 is approximately 3 and the timings get approximately 3 times larger.
+
+; Higher numbers like 100000 and 1000000 still reflect this order of growth.
+
+; The results are compatible with the notion,
+; that programs run on my machine run in time proportional to
+; the number of steps required for the computation.
