@@ -5,7 +5,7 @@
   "exercise-1.03.rkt")
 
 (check-equal? (square 12) 144 "squaring")
-(check-equal? (square 1.1) 1.21 "squaring")
+(check-equal? (square (/ 11 10)) (/ 121 100) "squaring")
 (check-equal? (square 11) 121 "squaring")
 (check-equal? (square 4) 16 "squaring")
 
