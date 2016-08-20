@@ -78,11 +78,6 @@
   (display " *** ")
   (display elapsed-time))
 
-;; test
-;(timed-prime-test 243312543675863)
-;(newline)
-;(prime? 243312543675863)
-
 (define (search-for-primes min max)
   (cond
     ((even? min) (search-for-primes (+ min 1) max))  ; start with an odd minimum number
@@ -102,13 +97,7 @@
 
 ;; Answers
 
-; I'd expect the time needed for computation to be approximately equal,
-; because the Fermat test on a certain level of abstraction does not do more steps for higher numbers,
-; than for lower numbers. The number of steps depends solely on the provided parameter `times`.
-
-; The timings show, that this is probably correct.
-
-; Discrepancies: Maybe there is a little bit more computation for higher numbers,
-; because of higher number of steps required for basic operations like modulo and division.
-; There could also be a performance loss,
-; if the numbers are too high to be natively represented and need to be software emulated.
+; Alyssa is not correct. The code Alyssa suggested runs much slower than the original code.
+; The expmod function uses a mathematical trick to keep calculating with low numbers.
+; Instead of squaring the parameter for a recursive call to expmod, it squares the result of that call and then calculates the modulo operation.
+; See the source code to find the line, where that happens.
