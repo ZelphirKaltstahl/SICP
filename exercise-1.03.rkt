@@ -10,4 +10,9 @@
     ((= (min x y z) y) (sum-of-squares x z))
     (else (sum-of-squares x y))))
 
+(provide
+	square
+    sum-of-squares
+    sum-of-squares-two-max)
+
 (sum-of-squares-two-max 10 20 14)
