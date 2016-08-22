@@ -72,4 +72,21 @@
      (else (find-carmichael-numbers (+ min 1) max)))
    (display "finished")))
 
-(find-carmichael-numbers 0 10000)
+(find-carmichael-numbers 0 100000)
+
+; 561
+; 1105
+; 1729
+; 2465
+; 2821
+; 6601
+; 8911
+; 10585
+; 15841
+; 29341
+; 41041
+; 46657
+; 52633
+; 62745
+; 63973
+; 75361
