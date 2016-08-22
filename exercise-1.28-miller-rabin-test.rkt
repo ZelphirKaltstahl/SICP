@@ -84,3 +84,8 @@
 ; 62745
 ; 63973
 ; 75361
+
+;; NOTE
+;; For this exercise I didn't actually change the expmod function as described in the exercise.
+;; I merely renamed it and changed the parameters given to it by the rabin-miller-test function to be the exponent - 1 and then check in the rabin-miller-test function for congruence to 1 (mod n).
+;; This seems simpler to me than changing the expmod function and plays well with my other code.
