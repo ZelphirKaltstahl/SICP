@@ -7,10 +7,10 @@
 (define (divides? a b) (= (remainder b a) 0))
 (define (even? n) (divides? 2 n))
 (define (next n)
-  (if
-   (even? n)
-   (+ n 1)
-   (+ n 2)))
+  (cond
+    ((< n 2) 2)
+    ((even? n) (+ n 1))
+    (else (+ n 2))))
 
 ;; prime number test
 (define (prime? n)
@@ -53,7 +53,7 @@
 
 
 
-(define (find-primes min max)
+(define (find-primes-func min max)
   ;; finds all prime numbers in between min and max (including min and excluding max)
   (if
    (< min max)
@@ -65,7 +65,10 @@
      (else (find-primes (next min) max)))
    (display "finished")))
 
-(find-primes 2 200)
+(define (find-primes min max)
+  (find-primes-func (next min) max))
+
+(find-primes 0 200)
 
 ; carmichael numbers
 ; 561
