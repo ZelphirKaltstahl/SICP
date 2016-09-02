@@ -3,16 +3,27 @@
 (define MAX-BYTES (Mb-to-B 64))
 (custodian-limit-memory (current-custodian) MAX-BYTES)
 
-;; a) product iteratively
-(define (product-iter term next a b)
+;; exercise 32
+(define (accumulate combine neutral-element term next a b)
 	(define (iter a result)
-		; (display "a: ") (display a) (newline)
-		; (display "result: ") (display result) (newline)
-		; (display "---------------") (newline)
 		(if
 			(> a b)
 			result
-			(iter (next a) (* (term a) result))))
-	(iter a 1))
+			(iter (next a) (combine (term a) result))))
+	(iter a neutral-element))
 
-(define identity (lambda (n) n))
+(define (product-acc term next a b)
+	(define (my-combine c d)
+		(* c d))
+	(accumulate my-combine 1 term next a b))
+
+(define (sum-acc term next a b)
+	(define (my-combine c d)
+		(+ c d))
+	(accumulate my-combine 0 term next a b))
+
+(define (my-next n)
+	(+ n 1))
+
+(product-acc identity my-next 1 6)
+(sum-acc identity my-next 1 10)
