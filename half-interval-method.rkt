@@ -75,3 +75,10 @@
 (half-interval-method
 	(lambda (x) (* (- x 1) (+ x 2) (- x 3)))
 	-3.0 4.0)
+
+(half-interval-method
+	sin 2.0 4.0)
+
+(half-interval-method
+	(lambda (x) (- (* x x x) (* 2 x) 3))
+	1.0 2.0)
