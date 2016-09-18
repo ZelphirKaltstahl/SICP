@@ -19,8 +19,7 @@
 			(iter
 				(compose func result-function)
 				(- remaining-applications-count 1))))
-	(iter func repeated-application-count)
-	)
+	(iter func repeated-application-count))
 
 (define (average a b)
 	(/ (+ a b) 2))
