@@ -3,21 +3,6 @@
 (define MAX-BYTES (Mb-to-B 64))
 (custodian-limit-memory (current-custodian) MAX-BYTES)
 
-(define x (cons 1 2))
-
-(car x)
-(cdr x)
-
-(define a (cons 1 2))
-(define b (cons 3 4))
-
-(define z (cons a b))
-
-(car (car z))
-(cdr (car z))
-(car (cdr z))
-(cdr (cdr z))
-
 (define (gcd a b)
 	(if
 		(= b 0)
@@ -44,18 +29,14 @@
 					(cons (/ (neg n) g) (/ (neg d) g)))))
 
 		((and (< n 0) (< d 0))
-			(begin
-				;(display "n<0, d<0")
-				(let
-					((g (gcd (neg n) (neg d))))
-					(cons (/ (neg n) g) (/ (neg d) g)))))
+			(let
+				((g (gcd (neg n) (neg d))))
+				(cons (/ (neg n) g) (/ (neg d) g))))
 
 		(else
-			(begin
-				;(display "n>=0, d>=0")
-				(let
-					((g (gcd n d)))
-					(cons (/ n g) (/ d g)))))))
+			(let
+				((g (gcd n d)))
+				(cons (/ n g) (/ d g))))))
 
 (define numer car)
 (define denom cdr)
