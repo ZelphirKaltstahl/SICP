@@ -105,6 +105,7 @@
 ;			(y-of-point (cdr rect)))
 ;		(car rect)))
 ;
+;; This representation uses 2 corners on a diagonal.
 ;(define (make-rect lower-left-corner upper-right-corner)
 ;	(cons lower-left-corner upper-right-corner))
 
@@ -143,6 +144,7 @@
 		(bottom-left-corner rect)
 		(upper-left-corner rect)))
 
+; This representation uses 4 corners in a linked list.
 (define (make-rect upper-left upper-right lower-right lower-left)
 	(cons upper-left
 		(cons upper-right
