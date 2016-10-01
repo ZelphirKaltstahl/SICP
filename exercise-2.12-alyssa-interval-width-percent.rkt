@@ -42,7 +42,7 @@
   (let
     [(upper (* c (+ 1.0 p)))
     (lower (* c (- 1.0 p)))]
-    [make-interval (upper) (lower)]))
+    [make-interval upper lower]))
 
 (define (percent interval)
   (let
