@@ -27,4 +27,5 @@
         (iter (cdr sublist) reslist))))
   (iter others (list first)))
 
-(same-parity 1 2 3 4 5 6 7)
+(time (same-parity 1 2 3 4 5 6 7))
+(time (same-parity 2 3 4 5 6 7 8))
