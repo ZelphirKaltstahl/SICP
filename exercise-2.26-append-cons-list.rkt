@@ -6,21 +6,18 @@
 (custodian-limit-memory (current-custodian) MAX-BYTES)
 ; racket -l errortrace -t exercise-...
 
-;; EXERCISE 2.25
+;; EXERCISE 2.26
 
 ;; predefined sequences
-(define a (list 1 3 (list 5 7) 9))
-(define b (list (list 7)))
-(define c (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+(define x (list 1 2 3))
+(define y (list 4 5 6))
 
-a
-b
-c
-
-;; getting the 7s
-(car (cdr (car (cddr a))))
-(caar b)
-(cadr (cadr (cadr (cadr (cadr (cadr c))))))
+(display "guess for (append x y): (1 2 3 4 5 6)") (newline)
+(append x y)
+(display "guess for (cons x y): ((1 2 3) 4 5 6)") (newline)
+(cons x y)
+(display "guess for (list x y): ((1 2 3) (4 5 6))") (newline)
+(list x y)
 
 ;; UNIT TESTS
 (define exercise-test
