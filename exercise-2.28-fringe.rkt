@@ -42,6 +42,16 @@
         (recur (cdr subtree) result))]))
   (recur tree nil))
 
+; a short solution using number?
+; http://community.schemewiki.org/?sicp-ex-2.28
+(define (fringe3 x)
+  (cond
+    ((null? x) x) 
+    ((number? x) (list x)) 
+    (else (append
+      (fringe (car x))
+      (fringe (cdr x))))))
+
 ;; UNIT TESTS
 (define (check-equal?-with-output a b failure-msg)
   (display "checking for equality:") (newline)
@@ -73,8 +83,12 @@
         (fringe2 (list (list (list 1 2) (list 3 4)) (list (list 1 2) (list 3 4))))
         (list 1 2 3 4 1 2 3 4)
         "fringe did not return the fringe"))
+    (test-case
+      "test if fringe works as it should"
+      (check-equal?-with-output
+        (fringe3 (list (list (list 1 2) (list 3 4)) (list (list 1 2) (list 3 4))))
+        (list 1 2 3 4 1 2 3 4)
+        "fringe did not return the fringe"))
   ))
 
 (run-test exercise-test)
-
-
