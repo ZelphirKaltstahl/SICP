@@ -33,7 +33,9 @@
   (number? part))
 
 (define (structure? part)
-  (pair? part))
+  (or
+    (weight? part)
+    (pair? part)))
 
 (define (mobile? part)
   (and
@@ -62,6 +64,12 @@
   (display b) (newline)
   (check-equal? a b failure-msg))
 
+(define (run-test-newlines a-test-suite)
+  (for-each
+    (λ (elem)
+      (display elem) (newline))
+    (run-test a-test-suite)))
+
 (define exercise-test
   (test-suite
     "exercise 2.22 test"
@@ -70,7 +78,7 @@
 
     (test-case
       "does left-branch return the left branch?"
-      (check-equal?-with-output
+      (check-equal?
         (left-branch (make-mobile
           (make-branch
             1
@@ -91,7 +99,7 @@
 
     (test-case
       "does right-branch return the right branch?"
-      (check-equal?-with-output
+      (check-equal?
         (right-branch (make-mobile
           (make-branch
             1
@@ -112,7 +120,7 @@
 
     (test-case
       "does branch-length return the length of the branch?"
-      (check-equal?-with-output
+      (check-equal?
         (branch-length (make-branch
           1
           (make-mobile
@@ -123,7 +131,7 @@
 
     (test-case
       "does branch-structure return the (sub)structure of the branch?"
-      (check-equal?-with-output
+      (check-equal?
         (branch-structure (make-branch
           1
           (make-mobile
@@ -135,15 +143,106 @@
         "branch-structure does not return the (sub)structure of the branch"))
 
     (test-case
-      "does branch-structure return the (sub)structure of the branch?"
-      (check-equal?-with-output
+      "does weight? return true for weights?"
+      (check-true
         (weight? (branch-structure (left-branch (branch-structure (make-branch
           1
           (make-mobile
             (make-branch 2 3)
             (make-branch 4 5)))))))
-        #t
-        "branch-structure does not return the (sub)structure of the branch"))
+        "weight? does not return true for weights"))
+
+    (test-case
+      "does structure? return #t for structures?"
+      (check-true
+        (structure? (branch-structure (left-branch (branch-structure
+          (make-branch
+            1
+            (make-mobile
+              (make-branch 2 3)
+              (make-branch 4 5)))))))
+        "structure? does not return #t for structures")
+      (check-true
+        (structure? (left-branch (branch-structure
+          (make-branch
+            1
+            (make-mobile
+              (make-branch 2 3)
+              (make-branch 4 5))))))
+        "structure? does not return #t for structures"))
+
+    (test-case
+      "does the mobile? predicate return #t for mobiles?"
+      (check-true
+        (mobile? (branch-structure
+          (make-branch
+            1
+            (make-mobile
+              (make-branch 2 3)
+              (make-branch 4 5)))))
+        "the mobile? predicate does not return #t for mobiles"))
+
+    (test-case
+      "does the mobile? predicate return #f for non-mobiles?"
+      (check-false
+        (mobile? (left-branch (branch-structure
+          (make-branch
+            1
+            (make-mobile
+              (make-branch 2 3)
+              (make-branch 4 5))))))
+        "the mobile? predicate does not return #f non-mobiles"))
+
+    (test-case
+      "does branch-weight return the correct branch weight?"
+      (check-equal?
+        (branch-weight (left-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10))))))
+        15
+        "branch-weight does not return the correct branch weight")
+      (check-equal?
+        (branch-weight (right-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10))))))
+        (+ 6 7 8 9 10)
+        "branch-weight does not return the correct branch weight"))
+    (test-case
+      "does total-weight return the correct weight for the mobile?"
+      (check-equal?
+        (total-weight
+          (make-mobile
+              (make-branch
+                1
+                (make-mobile
+                  (make-branch 2 3)
+                  (make-branch 4 5)))
+              (make-branch
+                6
+                (make-mobile
+                  (make-branch 7 8)
+                  (make-branch 9 10)))))
+        (+ 1 2 3 4 5 6 7 8 9 10)
+        "total-weight does not return the correct weight for the mobile"))
   ))
 
-(run-test exercise-test)
+(run-test-newlines exercise-test)
+
