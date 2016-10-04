@@ -42,9 +42,9 @@
 
 (define (branch-weight branch)
   (if
-    (and (weight? (car part)) (weight? (cadr part)))  ; weight weight case
-    (+ (car part) (cadr part))
-    (+ (car part) (total-weight (cadr part)))  ; weight mobile case
+    (and (weight? (car branch)) (weight? (cadr branch)))  ; weight weight case
+    (+ (car branch) (cadr branch))
+    (+ (car branch) (total-weight (cadr branch)))  ; weight mobile case
   ))
 
 (define (total-weight mobile)
@@ -71,7 +71,7 @@
     (test-case
       "does left-branch return the left branch?"
       (check-equal?-with-output
-        (make-mobile
+        (left-branch (make-mobile
           (make-branch
             1
             (make-mobile
@@ -81,13 +81,69 @@
             6
             (make-mobile
               (make-branch 7 8)
-              (make-branch 9 10))))
+              (make-branch 9 10)))))
         (make-branch
           1
           (make-mobile
             (make-branch 2 3)
             (make-branch 4 5)))
         "left-branch does not return the left branch"))
+
+    (test-case
+      "does right-branch return the right branch?"
+      (check-equal?-with-output
+        (right-branch (make-mobile
+          (make-branch
+            1
+            (make-mobile
+              (make-branch 2 3)
+              (make-branch 4 5)))
+          (make-branch
+            6
+            (make-mobile
+              (make-branch 7 8)
+              (make-branch 9 10)))))
+        (make-branch
+            6
+            (make-mobile
+              (make-branch 7 8)
+              (make-branch 9 10)))
+        "right-branch does not return the right branch"))
+
+    (test-case
+      "does branch-length return the length of the branch?"
+      (check-equal?-with-output
+        (branch-length (make-branch
+          1
+          (make-mobile
+            (make-branch 2 3)
+            (make-branch 4 5))))
+        1
+        "branch-length does not return the length of the branch"))
+
+    (test-case
+      "does branch-structure return the (sub)structure of the branch?"
+      (check-equal?-with-output
+        (branch-structure (make-branch
+          1
+          (make-mobile
+            (make-branch 2 3)
+            (make-branch 4 5))))
+        (make-mobile
+            (make-branch 2 3)
+            (make-branch 4 5))
+        "branch-structure does not return the (sub)structure of the branch"))
+
+    (test-case
+      "does branch-structure return the (sub)structure of the branch?"
+      (check-equal?-with-output
+        (weight? (branch-structure (left-branch (branch-structure (make-branch
+          1
+          (make-mobile
+            (make-branch 2 3)
+            (make-branch 4 5)))))))
+        #t
+        "branch-structure does not return the (sub)structure of the branch"))
   ))
 
 (run-test exercise-test)
