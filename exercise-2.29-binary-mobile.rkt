@@ -32,6 +32,9 @@
 (define (weight? part)
   (number? part))
 
+(define (len? part)
+  (number? part))
+
 (define (structure? part)
   (or
     (weight? part)
@@ -41,6 +44,16 @@
   (and
     (pair? (car part))
     (pair? (cadr part))))
+
+(define (branch? structure)
+  (if
+    (not (pair? structure))
+    #f
+    (and
+      (len? (car structure))
+      (or
+        (weight? (cadr structure))
+        (mobile? (cadr structure))))))
 
 (define (branch-weight branch)
   (if
@@ -58,7 +71,30 @@
   (* (branch-weight branch) (branch-length branch)))
 
 (define (balanced? mobile)
-  #t)
+  (define (traverse structure result)
+    (cond
+      ; weights in themselves cannot be balanced or unbalanced, so they should not influence the result of an and expression
+      [(weight? structure) result]
+      ; of branches there are two types, one with having a weight attached as cadr (1) and one with a submobile attached as cadr (2), so we distinguish the cases here
+      [(branch? structure)
+        (cond
+          ; weights in themselves cannot be balanced or unbalanced, so they should not change the result alone
+          [(weight? (cadr structure)) result]
+          ; if a submobile is attached, do a recursive call to check the whole submobile
+          [(mobile? (cadr structure)) (balanced? (cadr structure))])]
+      ; a mobile is balanced, if:
+      ; (1) the torques of the left and right branch are equal AND
+      ; (2) each of the submobiles on branches of the mobile are also balanced
+      [(mobile? structure)
+        (and
+          ; this is the only place where a #f can be created
+          (=
+            (torque (left-branch structure))
+            (torque (right-branch structure)))
+          ; here we have only recursive calls
+          (traverse (left-branch structure) result)
+          (traverse (right-branch structure) result))]))
+  (traverse mobile #t))
 
 ;; d.
 
@@ -248,7 +284,7 @@
                 (make-branch 9 10)))))
         (+ 3 5 8 10)
         "total-weight does not return the correct weight for the mobile"))
-    
+
     (test-case
       "does the torque procedure calculate the torque correctly?"
       (check-equal?
@@ -281,6 +317,40 @@
                 (make-branch 9 10))))))
         (* 6 (+ 8 10))
         "the torque procedure does not calculate the torque correctly"))
+
+    (test-case
+      "does the branch? predicate return #t for a branch?"
+      (check-true
+        (branch? (left-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10))))))
+        "the branch? predicate returns #f for a branch"))
+
+    (test-case
+      "does the branch? predicate return #f for a non-branch?"
+      (check-false
+        (branch? (branch-structure (left-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10)))))))
+        "the branch? predicate returns #t for a non-branch"))
 
     (test-case
       "does the predicate balanced? return #t for a balanced tree?"
@@ -317,5 +387,4 @@
         "the predicate balanced? wrongly returns #t for an unbalanced tree"))
   ))
 
-(run-test-newlines exercise-test)
-
+(time (run-test-newlines exercise-test))
