@@ -27,7 +27,7 @@
 
 ;; Explanation:
 ; The idea behind this is, that the set of all subset is the set, which contains
-; (1) all subsets without one of the elements of the original set (which reduces the problem size and will yield some result when only the empty list is left)
+; (1) all subsets without one of the elements of the original set (which reduces the problem size in recursive calls and will yield some result when only the empty list is left)
 ; (2) all subsets with the one elements of the original set, which is missing from the other subsets of (1)
 ; In order to get (1), we can simply do a recursive call.
 ; In order to get (2), we need to add the missing element to the result of (1), which we can do by using a let expression to temporarily store the result of (1) in a variable as done in the code.
