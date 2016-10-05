@@ -57,7 +57,7 @@
 
 (define (branch-weight branch)
   (if
-    (weight? (cadr branch))  ; weight case
+    (weight? (branch-structure branch))  ; weight case
     (branch-structure branch)  ; if the attached thing is only a weight, just take that weight as weight
     (total-weight (branch-structure branch))))  ; mobile case
 
@@ -79,15 +79,18 @@
       [(branch? structure)
         (cond
           ; weights in themselves cannot be balanced or unbalanced, so they should not change the result alone
-          [(weight? (cadr structure)) result]
+          [(weight?
+            (branch-structure structure)) result]
           ; if a submobile is attached, do a recursive call to check the whole submobile
-          [(mobile? (cadr structure)) (balanced? (cadr structure))])]
+          [(mobile? (right-branch structure))
+            (balanced? (right-branch structure))])]
       ; a mobile is balanced, if:
       ; (1) the torques of the left and right branch are equal AND
       ; (2) each of the submobiles on branches of the mobile are also balanced
       [(mobile? structure)
         (and
           ; this is the only place where a #f can be created
+          ; if at any point in the mobile the result is #f it will "bubble up"
           (=
             (torque (left-branch structure))
             (torque (right-branch structure)))
@@ -97,7 +100,7 @@
   (traverse mobile #t))
 
 ;; d.
-; if we changed the constructors for branches and mobiles, we would only have to change the selectors for parts of mobiles and other code, which selects parts of a mobile but does not use selectors, but uses car or cadr instead. one could improve upon that by creating procedures, which eliminate car and cadr from the procedures, except in the selectors. in that case one would only have to change those selectors. the selectors represent an abstraction barrier.
+; if we changed the constructors for branches and mobiles, we would only have to change the selectors for parts of mobiles and other code, which selects parts of a mobile but does not use selectors (like some predicates, which check for exactly those representations, in order to check whether something is for example a branch or not), but uses car or cadr instead. one could improve upon that by creating procedures, which eliminate car and cadr from the procedures, except in the selectors. in that case one would only have to change those selectors. the selectors represent an abstraction barrier.
 
 ;; UNIT TESTS
 (define (check-equal?-with-output a b failure-msg)
