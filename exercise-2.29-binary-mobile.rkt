@@ -44,10 +44,9 @@
 
 (define (branch-weight branch)
   (if
-    (and (weight? (car branch)) (weight? (cadr branch)))  ; weight weight case
-    (+ (car branch) (cadr branch))
-    (+ (car branch) (total-weight (cadr branch)))  ; weight mobile case
-  ))
+    (weight? (cadr branch))  ; weight case
+    (branch-structure branch)  ; if the attached thing is only a weight, just take that weight as weight
+    (total-weight (branch-structure branch))))  ; mobile case
 
 (define (total-weight mobile)
   (+
@@ -55,6 +54,12 @@
     (branch-weight (right-branch mobile))))
 
 ;; c.
+(define (torque branch)
+  (* (branch-weight branch) (branch-length branch)))
+
+(define (balanced? mobile)
+  #t)
+
 ;; d.
 
 ;; UNIT TESTS
@@ -208,7 +213,7 @@
               (make-mobile
                 (make-branch 7 8)
                 (make-branch 9 10))))))
-        15
+        (+ 3 5)
         "branch-weight does not return the correct branch weight")
       (check-equal?
         (branch-weight (right-branch
@@ -223,25 +228,93 @@
               (make-mobile
                 (make-branch 7 8)
                 (make-branch 9 10))))))
-        (+ 6 7 8 9 10)
+        (+ 8 10)
         "branch-weight does not return the correct branch weight"))
+
     (test-case
       "does total-weight return the correct weight for the mobile?"
       (check-equal?
         (total-weight
           (make-mobile
-              (make-branch
-                1
-                (make-mobile
-                  (make-branch 2 3)
-                  (make-branch 4 5)))
-              (make-branch
-                6
-                (make-mobile
-                  (make-branch 7 8)
-                  (make-branch 9 10)))))
-        (+ 1 2 3 4 5 6 7 8 9 10)
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10)))))
+        (+ 3 5 8 10)
         "total-weight does not return the correct weight for the mobile"))
+    
+    (test-case
+      "does the torque procedure calculate the torque correctly?"
+      (check-equal?
+        (torque (left-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10))))))
+        (* 1 (+ 3 5))
+        "the torque procedure does not calculate the torque correctly")
+      (check-equal?
+        (torque (right-branch
+          (make-mobile
+            (make-branch
+              1
+              (make-mobile
+                (make-branch 2 3)
+                (make-branch 4 5)))
+            (make-branch
+              6
+              (make-mobile
+                (make-branch 7 8)
+                (make-branch 9 10))))))
+        (* 6 (+ 8 10))
+        "the torque procedure does not calculate the torque correctly"))
+
+    (test-case
+      "does the predicate balanced? return #t for a balanced tree?"
+      (check-true
+        (balanced?
+          (make-mobile
+            (make-branch
+              4
+              (make-mobile
+                (make-branch 2 6)
+                (make-branch 3 4)))
+            (make-branch
+              8
+              (make-mobile
+                (make-branch 2 4)
+                (make-branch 8 1)))))
+        "the predicate balanced? wrongly returns #f for a balanced tree"))
+
+    (test-case
+      "does the predicate balanced? return #f for an unbalanced tree?"
+      (check-false
+        (balanced?
+          (make-mobile
+            (make-branch
+              4
+              (make-mobile
+                (make-branch 2 6)
+                (make-branch 3 4)))
+            (make-branch
+              8
+              (make-mobile
+                (make-branch 2 4)
+                (make-branch 8 2)))))
+        "the predicate balanced? wrongly returns #t for an unbalanced tree"))
   ))
 
 (run-test-newlines exercise-test)
