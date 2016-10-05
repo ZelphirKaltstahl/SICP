@@ -97,6 +97,7 @@
   (traverse mobile #t))
 
 ;; d.
+; if we changed the constructors for branches and mobiles, we would only have to change the selectors for parts of mobiles and other code, which selects parts of a mobile but does not use selectors, but uses car or cadr instead. one could improve upon that by creating procedures, which eliminate car and cadr from the procedures, except in the selectors. in that case one would only have to change those selectors. the selectors represent an abstraction barrier.
 
 ;; UNIT TESTS
 (define (check-equal?-with-output a b failure-msg)
