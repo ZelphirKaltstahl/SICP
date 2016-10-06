@@ -27,7 +27,7 @@
 ;; UNIT TESTS
 (define exercise-test
   (test-suite
-    "exercise 2.22 test"
+    "exercise 2.23 test"
     #:before (λ () (display "before") (newline))
     #:after (λ () (display "after") (newline))
 
