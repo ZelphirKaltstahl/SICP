@@ -52,16 +52,22 @@
       (count-leaves (cdr tree)))]))
 
 (define (count-leaves tree)
+  (display "called with tree: ") (display tree) (newline)
+  (if
+    (pair? tree)
+    (begin
+      (display "car of tree: ") (display (car tree)) (newline)
+      (display "cdr of tree: ") (display (cdr tree)) (newline))
+    (begin
+      (display "number") (newline)))
   (accumulate
-    (λ (x y) (+ 1 y))
+    +
     0
     (map
       (λ (subtree)
         (cond
-          [(not (pair? subtree)) 1]
-          [else (+
-            (count-leaves (car subtree))
-            (count-leaves (cdr subtree)))]))
+          [(pair? subtree) (count-leaves subtree)]
+          [else 1]))
       tree)))
 
 ;; UNIT TESTS
@@ -98,11 +104,3 @@
   ))
 
 (run-test exercise-test)
-
-(count-leaves
-          (list
-            1
-            (list
-              (list 2 3)
-              (list 4 5))
-            (list 6)))
