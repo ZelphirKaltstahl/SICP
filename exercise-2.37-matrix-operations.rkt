@@ -54,16 +54,25 @@
 (define (dot-product v w)
   (accumulate + 0 (map * v w)))
 
-(define (matrix-*-vector m v)
-  (map (accumulate dot-product 1 v) m))
+(define (matrix-*-vector mat vect)
+  (map
+    (lambda (row) (dot-product row vect))
+    mat))
 
 (define (transpose mat)
-  (accumulate-n ?? ?? mat))
+  (accumulate-n
+    (lambda (current next)
+      (cons current next))
+    nil
+    mat))
 
 (define (matrix-*-matrix m n)
   (let
-    [(cols transpose n)]
-    [map ?? m]))
+    [(cols (transpose n))]
+    [map
+      (lambda (row)
+        (matrix-*-vector cols row))
+      m]))
 
 ;; UNIT TESTS
 (define (check-equal?-with-output a b failure-msg)
@@ -103,21 +112,6 @@
         (list 1 -3)
         "matrix-*-vector does not work correctly"))
     (test-case
-      "test case for matrix-*-matrix"
-      (check-equal?
-        (matrix-*-vector
-          (list
-            (list 0 4 -2)
-            (list -4 -3 0))
-          (list
-            (list 0 1)
-            (list 1 -1)
-            (list 2 3)))
-        (list
-          (list 0 -10)
-          (list -3 -4))
-        "matrix-*-vector does not work correctly"))
-    (test-case
       "test case for transpose procedure"
       (check-equal?
         (transpose
@@ -130,6 +124,21 @@
           (list 2 5 8)
           (list 3 6 9))
         "transpose does not work correctly"))
+    (test-case
+      "test case for matrix-*-matrix"
+      (check-equal?
+        (matrix-*-matrix
+          (list
+            (list 0 4 -2)
+            (list -4 -3 0))
+          (list
+            (list 0 1)
+            (list 1 -1)
+            (list 2 3)))
+        (list
+          (list 0 -10)
+          (list -3 -1))
+        "matrix-*-matrix does not work correctly"))
   ))
 
 (run-test-newlines exercise-test)
