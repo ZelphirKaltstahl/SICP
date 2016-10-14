@@ -23,21 +23,17 @@
     (else (find-divisor n (+ test-divisor 1)))))
 
 
-
-
-
-
-
 (define (non-trivial-sqrt-of-one? base exp m)
   (cond
     ((= exp 0) 1)
-    ((even? exp) (remainder
-                   (square (non-trivial-sqrt-of-one? base (halve exp) m))  ; here is a trick: The squaring happens outside!
-                   m))
-    (else (remainder
-            (* base (non-trivial-sqrt-of-one? base (decrement exp) m))
-            m))))
-
+    ((even? exp)
+      (remainder
+        (square (non-trivial-sqrt-of-one? base (halve exp) m))  ; here is a trick: The squaring happens outside!
+        m))
+    (else
+      (remainder
+        (* base (non-trivial-sqrt-of-one? base (decrement exp) m))
+        m))))
 
 (define (rabin-miller-test number-to-check a)
   ; simply call the function with an (n-1) instead of n like with expmod previously
@@ -51,19 +47,18 @@
      false)
    true))
 
-
-
 (define (find-primes-func min max)
   ;; finds all prime numbers in between min and max (including min and excluding max)
   (if
-   (< min max)
-   (cond
-     ((check-rabin-miller-all min 2) (begin
-                                       (display min)
-                                       (newline)
-                                       (find-primes (+ min 1) max)))
-     (else (find-primes (next min) max)))
-   (display "finished")))
+    (< min max)
+    (cond
+      ((check-rabin-miller-all min 2)
+        (begin
+          (display min) (newline)
+          (find-primes (+ min 1) max)))
+      (else
+        (find-primes (next min) max)))
+    (display "finished")))
 
 (define (find-primes min max)
   (find-primes-func (next min) max))
