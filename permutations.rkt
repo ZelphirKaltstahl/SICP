@@ -67,74 +67,11 @@
         (cdr rest))))
   (iter initial sequence))
 
-
-;; MILLER-RABIN-TEST CODE
-;; basic functions
-(define (halve n) (/ n 2))
-(define (decrement n) (- n 1))
-(define (square x) (* x x))
-(define (divides? a b) (= (remainder b a) 0))
-(define (even? n) (divides? 2 n))
-
-(define (non-trivial-sqrt-of-one? base exp m)
-  (cond
-    ((= exp 0) 1)
-    ((even? exp)
-      (remainder (square (non-trivial-sqrt-of-one? base (halve exp) m)) m))
-    (else
-      (remainder (* base (non-trivial-sqrt-of-one? base (decrement exp) m)) m))))
-
-(define (rabin-miller-test number-to-check a)
-  (= (non-trivial-sqrt-of-one? a (- number-to-check 1) number-to-check) 1))
-
-;; checks for all numbers smaller than the number we want to check for primality
-(define (check-rabin-miller-all n counter)
-  (if
-    (< counter n)
-    (if
-      (rabin-miller-test n counter)
-      (check-rabin-miller-all n (+ counter 1))
-      false)
-    true))
-
 ;; FLATMAP CODE
 (define (flatmap proc seq)
   (accumulate append nil (map proc seq)))
 
-;; EXAMPLE CODE
-;; 1. All 1 <= j <= i <= n so that j+i is prime
-(define (unique-pairs minimum maximum)
-  (accumulate
-    append
-    nil
-    (map (lambda (i)
-      (map (lambda (j)
-        (list i j))
-        (enumerate-interval minimum (- i 1))))
-      (enumerate-interval minimum maximum))))
-
-(define (prime-sum? pair)
-  (define (probably-prime? n)
-    (check-rabin-miller-all n 1))
-  (probably-prime? (+ (car pair) (cadr pair))))
-
-(define (make-pair-sum pair)
-  (list
-    (car pair)
-    (cadr pair)
-    (+ (car pair) (cadr pair))))
-
-(define (print-list alist)
-  (for-each
-    (λ (elem) (display elem) (newline))
-    alist))
-
-(display "All 1 <= j <= i <= 20 so that j+i is prime:") (newline)
-(print-list
-  (map make-pair-sum (filter prime-sum? (unique-pairs 1 20))))
-(newline)
-
-;; 2. Permutations of lists
+;; PERMUTATIONS
 (define (remove item sequence)
   (filter
     (λ (x)
@@ -156,8 +93,8 @@
 (permutations (list 1 2 3 4))
 (newline)
 
-(display "All permutations of (1 2 2):") (newline)
-(permutations (list 1 2 2))
+(display "All permutations of (1 2):") (newline)
+(permutations (list 1 2))
 (newline)
 
 ;; UNIT TESTS

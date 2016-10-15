@@ -97,12 +97,12 @@
       false)
     true))
 
-;; FLATMAP CODE
 (define (flatmap proc seq)
   (accumulate append nil (map proc seq)))
 
-;; EXAMPLE CODE
-;; 1. All 1 <= j <= i <= n so that j+i is prime
+;; EXERCISE 2.40
+;; - unique-pairs procedure for simplification of prime-sum-pairs
+
 (define (unique-pairs minimum maximum)
   (accumulate
     append
@@ -129,35 +129,12 @@
     (λ (elem) (display elem) (newline))
     alist))
 
+(define (prime-sum-pairs n)
+  (map make-pair-sum (filter prime-sum? (unique-pairs 1 n))))
+
 (display "All 1 <= j <= i <= 20 so that j+i is prime:") (newline)
 (print-list
-  (map make-pair-sum (filter prime-sum? (unique-pairs 1 20))))
-(newline)
-
-;; 2. Permutations of lists
-(define (remove item sequence)
-  (filter
-    (λ (x)
-      (not (= x item)))
-    sequence))
-
-(define (permutations aset)
-  (if
-    (empty? aset)
-    (list nil)
-    (flatmap
-      (lambda (elem)
-        (map
-          (lambda (subperm) (cons elem subperm))
-          (permutations (remove elem aset))))
-      aset)))
-
-(display "All permutations of (1 2 3 4):") (newline)
-(permutations (list 1 2 3 4))
-(newline)
-
-(display "All permutations of (1 2 2):") (newline)
-(permutations (list 1 2 2))
+  (prime-sum-pairs 20))
 (newline)
 
 ;; UNIT TESTS
