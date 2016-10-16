@@ -76,44 +76,55 @@
 ;; === GIVEN CODE ===
 ; note: I made the code more readable by actually using meaningful variable names.
 (define (queens board-size)
-  (define (queen-cols col-count)
-    (display "working on col ") (display col-count) (newline)
+  (define (solve col-count)
+    (display "board-size is: ") (display col-count) (newline)
+    (display "working on col: ") (display col-count) (newline)
     (if
       ; If the board is of size 0 ...
       (= col-count 0)
       ; ... we return the list, which contains the empty board as the only solution.
-      (list empty-board)
+      (begin
+        (display "board-size is 0") (newline)
+        (list empty-board))
       ; Otherwise we filter ...
       (filter
         ; ... with the safe? predicate to obtain only solutions, where queens do not attack each other, ...
         ; (note: one "queen-positions" is actually one "board-position")
         ; (We want only valid board-positions!!! So we have to filter the set of all possible board-positions.)
-        (λ (queen-positions) (safe? col-count queen-positions))
+        (λ (queen-positions)
+          (display "checking for queen safe to add.") (newline)
+          (display "current queen-positions: ") (display queen-positions) (newline)
+          (display "trying to add queen at: ") (display col-count) (newline)
+          (safe? col-count queen-positions))
         ; ... a list of potential solutions,
         ; which is the result of an application of flatmap.
         ; This should contain all possible board-positions.
         (flatmap
           ; procedure, which we apply to all solutions of baord size k-1
-          ; rest-of-queens is one solution for k-1 queens or a board size of k-1,
+          ; board-position is one solution for k-1 queens or a board size of k-1,
           ; while being in the k-th iteration
-          (λ (rest-of-queens)
+          (λ (board-position)
+            (display "current board-position: ") (display board-position) (newline)
+            (display "getting map: ") (newline)
+            (display (map (λ (new-row) (add-queen board-position (make-square new-row col-count))) (enumerate-interval 1 board-size))) (newline)
             ; For each solution for a board of size k-1 ...
             (map
               ; ... add a queen to the board position in row new-row and column k ...
               (λ (new-row)
-                (adjoin-position
+                (add-queen board-position (make-square
                   new-row
-                  col-count
-                  rest-of-queens))
+                  col-count)))
               ; ... for all possible row indices with the current board size.
+              ; NOTE: THIS STARTS AT 1 !!!
+              ; This means all other parts of the program need to do the same or this needs to change
               (enumerate-interval 1 board-size)))
           ; the solutions for a board size of k-1
-          (queen-cols (- col-count 1))))))
+          (solve (- col-count 1))))))
   
   ; We want the queen columns for a given board size!
   ; A queen column is actually simply a row index, in which the queen is positioned in that column.
   ; We only interpret it as a whole column.
-  (queen-cols board-size))
+  (solve board-size))
 
 ;; === Explanation ===
 ; rest-of-queens:
@@ -128,7 +139,7 @@
 ;   predicate for determining if a new-row is safe for adjoining with an existing (safe) positioning of queens
 
 ;; === TODO ===
-; * representation for sets of board positions
+; * representation for sets of board positions (??? list of boards?)
 ; * adjoin-position: adjoining a new row-column position to a set of queen positions
 ; * representation of an empty set of queen positions as empty-board
 ; * safe? determining for a set of queen positions if addition of a queen position is safe
@@ -142,25 +153,11 @@
 (define (get-square-col square)
   (cadr square))
 
-(define (get-nth-item sequence n)
-  "this procedure uses zero indexing"
-  (list-ref sequence n))
-
-(define make-board (λ () nil))
-
 (define empty-board nil)
 
-(define (add-queen board square)
-  (cond
-    [(empty? board)
-      (list square)]
-    [else
-      (append board (list square))]))
-
-(define (adjoin-position row col current-board)
-  (add-queen
-    current-board
-    (make-square row col)))
+(define (add-queen board-position square)
+  (display "adding queen on ") (display square) (newline)
+  (cons square board-position))
 
 (define (on-same-diagonal? square1 square2)
   (=
@@ -177,19 +174,9 @@
     (get-square-col square1)
     (get-square-col square2)))
 
-(define (find-max-column queens)
-  (define (iter current-max remaining-queens)
-    (cond
-      [(empty? remaining-queens) current-max]
-      [else (cond
-        [(> (get-square-col (car remaining-queens)) current-max)
-          (iter (get-square-col (car remaining-queens)) (cdr remaining-queens))]
-        [else (iter current-max (cdr remaining-queens))])]))
-  (iter -1 queens))
-
-
 (define (get-in-check-predicate square1)
   (λ (square2)
+    (display "checking squares: ") (display square1) (display " and ") (display square2) (newline)
     (or
       (on-same-row? square1 square2)
       (on-same-col? square1 square2)
@@ -197,12 +184,33 @@
 
 (define (safe? row board-position)
   (let
-    [(square1 (make-square
+    [(new-queen-square (make-square
       row
-      (+ (find-max-column board-position) 1)))]
-    [empty? (filter
-      (get-in-check-predicate square1)
-      board-position)]))
+      (+ (length board-position) 1)))]  ; or find-max-column
+    
+    ; adding a queen to a board-position is safe,
+    ; if the list of queens being in check with the new queen
+    ; is empty
+;    [empty? (filter
+;      (get-in-check-predicate new-queen-square)
+;      board-position)]))
+    [if
+      (empty? (filter
+        (get-in-check-predicate new-queen-square)
+        board-position))
+      (begin
+        (display "trying to add queen on square: ") (display new-queen-square) (newline)
+        (display "adding the queen is safe") (newline)
+        (display "list of all previous queens: ") (display board-position) (newline)
+        (display "------------------") (newline)
+        #t)
+      (begin
+        (display "adding the queen is unsafe") (newline)
+        (display "tried to add queen on square: ") (display new-queen-square) (newline)
+        (display "it was in check with the following other queens: ") (display (filter (get-in-check-predicate new-queen-square) board-position)) (newline)
+        (display "list of all previous queens: ") (display board-position) (newline)
+        (display "------------------") (newline)
+        #f)]))
 
 ;; UNIT TESTS
 (define (check-equal?-with-output a b failure-msg)
@@ -245,22 +253,17 @@
         "get-square-col does not work correctly"))
     
     (test-case
-      "test for get-nth-item"
-      (check-equal?
-        (get-nth-item (list 2 3 4 5 6 7) 2)
-        4
-        "get-nth-item does not work correctly")
-      (check-equal?
-        (get-nth-item (list 232 4 345 2136 7) 3)
-        2136
-        "get-nth-item does not work correctly"))
-    
-    (test-case
       "test case for on-same-diagonal? predicate"
       (check-equal?
         (on-same-diagonal?
           (make-square 1 2)
           (make-square 4 5))
+        #t
+        "on-same-diagonal? predicate does not work correctly")
+      (check-equal?
+        (on-same-diagonal?
+          (make-square 1 2)
+          (make-square 2 1))
         #t
         "on-same-diagonal? predicate does not work correctly")
       (check-equal?
@@ -319,116 +322,85 @@
         "on-same-col? predicate does not work correctly"))
     
     (test-case
-      "test case for make-board"
-      (check-equal? (make-board) nil
-        "make-board does not work correctly"))
-    
-    (test-case
       "test case for add-queen"
       (check-equal?
         (add-queen
-          (make-board)
+          empty-board
           (make-square 1 2))
         (list (make-square 1 2))
         "add-queen does not work correctly")
       (check-equal?
-        (add-queen
-          (add-queen
-            (make-board)
-            (make-square 1 2))
+        (add-queen (add-queen
+          empty-board
+          (make-square 1 2))
           (make-square 3 4))
-        (list (make-square 1 2) (make-square 3 4))
+        (list (make-square 3 4) (make-square 1 2))
         "add-queen does not work correctly"))
     
     (test-case
-      "test case for adjoin-position"
-      (check-equal?
-        (adjoin-position
-          6 7
-          (add-queen
-            (add-queen
-              (make-board)
-              (make-square 1 2))
-            (make-square 3 4)))
-        (list (make-square 1 2) (make-square 3 4) (make-square 6 7))
-        "adjoin-position failure"))
-    
-    (test-case
       "test case for safe? predicate"
-      (check-equal?
-        (safe?
-          5
-          (add-queen
-            (add-queen
-              (add-queen
-                (add-queen
-                  (make-board)
-                  (make-square 0 0))
-                (make-square 1 1))
-              (make-square 2 2))
-            (make-square 3 3)))
-        #t
-        "safe? failure")
-      (check-equal?
+      (check-equal?-with-output
         (safe?
           6
-          (add-queen
-            (add-queen
-              (add-queen
-                (add-queen
-                  (make-board)
-                  (make-square 0 1))
-                (make-square 2 2))
-              (make-square 3 0))
-            (make-square 5 3)))
+          (add-queen (add-queen (add-queen (add-queen
+            empty-board
+            (make-square 1 1))
+            (make-square 2 2))
+            (make-square 3 3))
+            (make-square 4 4)))
+        #t
+        "safe? failure")
+      (check-equal?-with-output
+        (safe?
+          7
+          (add-queen (add-queen (add-queen (add-queen
+            empty-board
+            (make-square 1 2))
+            (make-square 3 3))
+            (make-square 4 1))
+            (make-square 6 4)))
         #f
         "safe? failure")
-      (check-equal?
+      (check-equal?-with-output
         (safe?
-          4
-          (add-queen
-            (add-queen
-              (add-queen
-                (make-board)
-                (make-square 0 1))
-              (make-square 2 2))
-            (make-square 3 0)))
+          5
+          (add-queen (add-queen (add-queen
+            empty-board
+            (make-square 1 2))
+            (make-square 3 3))
+            (make-square 4 1)))
         #t
-        "safe? failure"))
+        "safe? failure")
+        )
     
     (test-case
-      "test case for find-max-column"
+      "test case for get-in-check-predicate"
       (check-equal?
-        (find-max-column
-          (add-queen
-            (add-queen
-              (add-queen
-                (add-queen
-                  (make-board)
-                  (make-square 0 0))
-                (make-square 1 1))
-              (make-square 2 2))
-            (make-square 3 3)))
-        3
-        "find-max-column failure")
+        ((get-in-check-predicate (make-square 1 1)) (make-square 1 5))
+        #t
+        "get-in-check-predicate failure, returned predicate does not work correctly")
       (check-equal?
-        (find-max-column
-          (add-queen
-            (add-queen
-              (add-queen
-                (make-board)
-                (make-square 0 0))
-              (make-square 1 1))
-            (make-square 3 2)))
-        2
-        "find-max-column failure"))
-    
-    
+        ((get-in-check-predicate (make-square 1 1)) (make-square 4 1))
+        #t
+        "get-in-check-predicate failure, returned predicate does not work correctly")
+      (check-equal?
+        ((get-in-check-predicate (make-square 1 1)) (make-square 3 3))
+        #t
+        "get-in-check-predicate failure, returned predicate does not work correctly")
+      (check-equal?
+        ((get-in-check-predicate (make-square 1 1)) (make-square 2 5))
+        #f
+        "get-in-check-predicate failure, returned predicate does not work correctly")
+      (check-equal?
+        ((get-in-check-predicate (make-square 2 1)) (make-square 3 3))
+        #f
+        "get-in-check-predicate failure, returned predicate does not work correctly"))
   ))
 
 (run-test-newlines exercise-test)
 
-(display "Solutions to the queens problem with board-size 4 are: ") (display (queens 4)) (newline)
+(display "Solutions to the queens problem with board-size 4 are: ") (newline)
+(display (queens 4)) (newline)
 
 ;;; OLD CODE
 
@@ -514,3 +486,59 @@
 ;        (iter (cons (make-row nil 0) result) (+ counter 1))]
 ;      [else result]))
 ;  (iter nil 0))
+
+;(define (adjoin-position row col board-position)
+;  (add-queen
+;    board-position
+;    (make-square row col)))
+
+;    (test-case
+;      "test case for adjoin-position"
+;      (check-equal?
+;        (adjoin-position
+;          6 7
+;          (add-queen (add-queen
+;              (make-board)
+;              (make-square 1 2))
+;            (make-square 3 4)))
+;        (list (make-square 6 7) (make-square 3 4) (make-square 1 2))
+;        "adjoin-position failure"))
+
+;(define (find-max-column queens)
+;  (define (iter current-max remaining-queens)
+;    (cond
+;      [(empty? remaining-queens) current-max]
+;      [else (cond
+;        [(> (get-square-col (car remaining-queens)) current-max)
+;          (iter (get-square-col (car remaining-queens)) (cdr remaining-queens))]
+;        [else (iter current-max (cdr remaining-queens))])]))
+;  (iter -1 queens))
+
+;    (test-case
+;      "test case for find-max-column"
+;      (check-equal?
+;        (find-max-column
+;          (add-queen (add-queen (add-queen (add-queen
+;                  (make-board)
+;                  (make-square 0 0))
+;                (make-square 1 1))
+;              (make-square 2 2))
+;            (make-square 3 3)))
+;        3
+;        "find-max-column failure")
+;      (check-equal?
+;        (find-max-column
+;          (add-queen (add-queen (add-queen
+;                (make-board)
+;                (make-square 0 0))
+;              (make-square 1 1))
+;            (make-square 3 2)))
+;        2
+;        "find-max-column failure"))
+
+;    (test-case
+;      "test case for make-board"
+;      (check-equal? (make-board) nil
+;        "make-board does not work correctly"))
+
+;(define make-board (λ () nil))
