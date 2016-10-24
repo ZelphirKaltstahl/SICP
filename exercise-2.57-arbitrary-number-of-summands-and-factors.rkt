@@ -52,27 +52,37 @@
     (pair? x)
     (eq? (car x) '*)))
 
-(define (addend s) (cadr s))
-(define (augend s) (caddr s))
+(define (addend s)
+  (cadr s))
+
+(define (augend s)
+  (if
+    (pair? s)
+    (let
+      [(augend (cddr s))]
+      [foldr make-sum 0 augend])  ; foldr is the same as accumulate - to calculate the result with the operation and the first element, all the other elements on the right of it need to be calculated, like a carpet furled from the RIGHT to the left, ACCUMULATING more and more operation results.
+    (caddr s)))
 
 (define (multiplier p) (cadr p))
-(define (multiplicant p) (caddr p))
+(define (multiplicant p)
+  (if
+    (pair? p)
+    (let
+      [(multiplicant (cddr p))]
+      [foldr make-product 1 multiplicant])
+    (caddr p)))
 
-;; for exercise
 (define (base power)
   (cadr power))
 
-;; for exercise
 (define (exponent power)
   (caddr power))
 
-;; for exercise
 (define (exponentiation? x)
   (and
     (pair? x)
     (eq? (car x) '**)))
 
-;; for exercise
 (define (make-exponentiation base exponent)
   (cond
     [(=number? exponent 1) base]
@@ -110,9 +120,62 @@
       (error "unknown expression type: DERIV" expression)]))
 
 ;; EXAMPLES
-
 (deriv '(+ x 3) 'x)
 (deriv '(* x y) 'x)
 (deriv '(* (* x y) (+ x 3)) 'x)
 (deriv '(+ (* x y) (* y (+ x 3))) 'x)
 (deriv '(** (+ x 1) 2) 'x)
+
+;; for exercise
+(deriv '(+ x x x x x) 'x)  ; 5
+(deriv '(+ (* 2 x) (* 3 x) (* 4 x) (* 2 x) x) 'x)  ; 12
+(deriv '(* 2 2 6 x) 'x)  ; 24
+
+(define (check-equal?-with-output a b failure-msg)
+  (display "checking for equality:") (newline)
+  (display a) (newline)
+  (display b) (newline)
+  (check-equal? a b failure-msg))
+
+(define (run-test-newlines a-test-suite)
+  (for-each
+    (λ (elem)
+      (display elem) (newline))
+    (run-test a-test-suite)))
+
+(define exercise-test (test-suite
+  "exercise 2.57 test suite"
+  
+  #:before (λ () (display "before test cases") (newline))
+  #:after (λ () (display "after test cases") (newline))
+
+  (test-case
+    "test case for ..."
+    (check-equal?
+      (deriv '(+ x 3) 'x)
+      1
+      "test case for ... failed"))
+
+  (test-case
+    "test case for deriving a sum with multiple operands"
+    (check-equal?
+      (deriv '(+ x x x x x) 'x)
+      5
+      "cannot sum with multiple operands correctly"))
+
+  (test-case
+    "test cse for product with multiple operands"
+    (check-equal?
+      (deriv '(* 2 2 6 x) 'x)
+      24
+      "cannot multiply with multiple operands correctly"))
+
+  (test-case
+    "test case for combining sum and multiplication with multiple operands"
+    (check-equal?
+      (deriv '(+ (* 2 5 x) (* 3 x) (* 4 x) (* 2 x) x) 'x)
+      20
+      "combination does not work correctly"))
+  ))
+
+(run-test-newlines exercise-test)
