@@ -1,10 +1,6 @@
 #lang racket
-(require rackunit)
-(define (Mb-to-B n) (* n 1024 1024))
-(define MAX-BYTES (Mb-to-B 64))
-(define nil '())
-(custodian-limit-memory (current-custodian) MAX-BYTES)
-; racket -l errortrace -t exercise-...
+
+(provide (all-defined-out))
 
 ;; GIVEN CODE
 (define (variable? x) (symbol? x))
@@ -28,9 +24,9 @@
       (number? a1)
       (number? a2))
       (+ a1 a2)]
-    [(eq? a1 a2) (list 2 '* a1)]  ; edited
+    [(eq? a1 a2) (list 2 '* a1)]
     [else
-      (list a1 '+ a2)]))  ; edited
+      (list a1 '+ a2)]))
 
 (define (make-product m1 m2)
   (cond
@@ -39,30 +35,31 @@
     [(=number? m2 1) m1]
     [(and (number? m1) (number? m2))
       (* m1 m2)]
-    [else (list m1 '* m2)]))  ; edited
+    [else (list m1 '* m2)]))
 
 (define (sum? x)
   (and
     (pair? x)
-    (eq? (cadr x) '+)))  ; edited
+    (eq? (cadr x) '+)))
 
 (define (product? x)
   (and
     (pair? x)
-    (eq? (cadr x) '*)))  ; edited
+    (eq? (cadr x) '*)))
 
 (define (addend s)
-  (car s))  ; edited
+  (car s))
 
 (define (augend s)
-  (if
-    (pair? s)
-    (let
-      [(augend (cddr s))]
-      [foldr make-sum 0 augend])  ; foldr is the same as accumulate - to calculate the result with the operation and the first element, all the other elements on the right of it need to be calculated, like a carpet furled from the RIGHT to the left, ACCUMULATING more and more operation results.
-    (caddr s)))
+  (let
+    [(augend-part (cddr s))]
+    [cond
+      [(pair? augend-part)
+        (car augend-part)]
+      [else (car augend-part)]]))
 
-(define (multiplier p) (car p))  ; edited
+
+(define (multiplier p) (car p))
 
 (define (multiplicant p)
   (if
@@ -73,7 +70,7 @@
     (caddr p)))
 
 (define (base power)
-  (car power))  ; edited
+  (car power))
 
 (define (exponent power)
   (caddr power))
@@ -81,7 +78,7 @@
 (define (exponentiation? x)
   (and
     (pair? x)
-    (eq? (cadr x) '**)))  ; edited
+    (eq? (cadr x) '**)))
 
 (define (make-exponentiation base exponent)
   (cond
@@ -89,7 +86,7 @@
     [(=number? exponent 0) 1]
     [(=number? base 1) 1]
     [(=number? base 0) 0]
-    [else (list base '** exponent)]))  ; edited
+    [else (list base '** exponent)]))
 
 (define (deriv expression var)
   (cond
@@ -118,141 +115,3 @@
         (deriv (base expression) var))]                  ; u'
     [else
       (error "unknown expression type: DERIV" expression)]))
-
-
-
-;; UNIT TESTING
-(define (check-equal?-with-output a b failure-msg)
-  (display "checking for equality:") (newline)
-  (display a) (newline)
-  (display b) (newline)
-  (check-equal? a b failure-msg))
-
-(define (run-test-newlines a-test-suite)
-  (for-each
-    (λ (elem)
-      (display elem) (newline))
-    (run-test a-test-suite)))
-
-(define exercise-test (test-suite
-  "exercise 2.57 test suite"
-  
-  #:before (λ () (display "before test cases") (newline))
-  #:after (λ () (display "after test cases") (newline))
-
-  (test-case
-    "test case for product? predicate"
-    (check-equal?
-      (product? (list 1 '* 1))
-      true
-      "The predicate product? does not work correctly.")
-    (check-equal?
-      (product? (list 1 '* (list -2 '* 4)))
-      true
-      "The predicate product? does not work correctly.")
-    (check-equal?
-      (product? (list (list 3.0 '+ 4) '* 1))
-      true
-      "The predicate product? does not work correctly.")
-    (check-equal?
-      (product? (list (list 3.0 '* 4) '+ 1))
-      false
-      "The predicate product? does not work correctly.")
-    (check-equal?
-      (product? (list (list 3.0 '* 4) '+ 1))
-      false
-      "The predicate product? does not work correctly.")
-    (check-equal?
-      (product? (list (list 3.0 '* 4) '+ 1))
-      false
-      "The predicate product? does not work correctly."))
-
-  (test-case
-    "test case for make-product"
-    (check-equal?
-      (make-product 0 2)
-      0
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 3 1)
-      3
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 4 -2)
-      -8
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 'x 2)
-      (list 'x '* 2)
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 0 'x)
-      0
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 'x 'y)
-      (list 'x '* 'y)
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 'y 1)
-      'y
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product 'y (make-sum 'x 0))
-      (list 'y '* 'x)
-      "make-product does not work correctly.")
-    (check-equal?
-      (make-product (make-product 'y 1) 1)
-      'y
-      "make-product does not work correctly."))
-
-  (test-case
-    "test case for multiplier"
-    (check-equal?
-      (multiplier '(x * 3))
-      'x
-      "multiplier does not return the correct multiplier."))
-
-  (test-case
-    "test case for multiplicant"
-    (check-equal?
-      (multiplicant '(y * 10))
-      10
-      "multiplicant did not return the correct result."))
-
-  (test-case
-    "test case for ..."
-    (check-equal?
-      (deriv '(x + 3) 'x)
-      1
-      "test case for simple addition derivate failed"))
-
-  (test-case
-    "test case for deriving a sum with multiple operands"
-    (check-equal?
-      (deriv '(x + x + x + x + x) 'x)
-      5
-      "cannot sum with multiple operands correctly"))
-
-  (test-case
-    "test cse for product with multiple operands"
-    (check-equal?
-      (deriv '(2 * 2 * 6 * x) 'x)
-      24
-      "cannot multiply with multiple operands correctly"))
-
-  (test-case
-    "test case for combining sum and multiplication with multiple operands"
-    (check-equal?
-      (deriv '((5 * x) + (3 * x) + (4 * x) + (2 * x) + x) 'x)
-      15
-      "combination does not work correctly")) 
-
-  (test-case
-    "test case for combining sum and multiplication with multiple operands"
-    (check-equal?
-      (deriv '((2 * 5 * x) + (3 * x) + (4 * x) + (2 * x) + x) 'x)
-      20
-      "combination does not work correctly"))))
-
-(run-test-newlines exercise-test)
