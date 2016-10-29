@@ -134,7 +134,7 @@
     '(c * d)
     "augend procedure does not work correctly.")
   (check-equal?
-    (augend '(a + '(5 * 6) + 2))
+    (augend '(a + (5 * 6) + 2))
     '((5 * 6) + 2)
     "augend procedure does not work correctly."))
 
@@ -152,7 +152,7 @@
 (test-case
   "multiplicant test case"
   (check-equal? (multiplicant '(a * 1 * 2)) '(1 * 2)
-    "multiplicant procedure does not work on sums of multiple operands correctly.")
+    "multiplicant procedure does not work on products of multiple operands correctly.")
   (check-equal? (multiplicant '(a * 1 * b)) '(1 * b)
     "multiplicant procedure does not work correctly.")
   (check-equal?
@@ -160,7 +160,7 @@
     '(c + d)
     "multiplicant procedure does not work correctly.")
   (check-equal?
-    (multiplicant '(a * '(5 + 6) * 2))
+    (multiplicant '(a * (5 + 6) * 2))
     '((5 + 6) * 2)
     "multiplicant procedure does not work correctly."))
 
@@ -210,4 +210,16 @@
   (check-equal?
     (deriv '((2 * 5 * x) + (3 * x) + (4 * x) + (2 * x) + x) 'x)
     20
+    "combination does not work correctly")
+  (check-equal? (deriv '(2 + 2 * 5 * x) 'x) 10
+    "combination does not work correctly")
+  (check-equal? (deriv '((2 * 5 * x) + (3 + 10 * x)) 'x) 20
+    "combination does not work correctly")
+  (check-equal? (deriv (make-product (make-sum (make-product 10 3) 2) 'x) 'x) 32
+    "combination does not work correctly")
+  (check-equal? (deriv '((10 * 3 + 2) * x) 'x) '(10 * 3 + 2)
+    "combination does not work correctly")
+  (check-equal? (deriv '(x + 3 * (x + y + 2)) 'x) 4
+    "combination does not work correctly")
+  (check-equal? (deriv '((10 + 3 * x) + 3 * (x + y + 2)) 'x) 6
     "combination does not work correctly"))

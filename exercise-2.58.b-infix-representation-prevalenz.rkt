@@ -54,20 +54,18 @@
   (let
     [(augend-part (cddr s))]
     [cond
-      [(pair? augend-part)
-        (car augend-part)]
-      [else (car augend-part)]]))
+      [(= (length augend-part) 1) (car augend-part)]
+      [else augend-part]]))
 
 
 (define (multiplier p) (car p))
 
 (define (multiplicant p)
-  (if
-    (pair? p)
-    (let
-      [(multiplicant (cddr p))]
-      [foldr make-product 1 multiplicant])
-    (caddr p)))
+  (let
+    [(multiplicant-part (cddr p))]
+    [cond
+      [(= (length multiplicant-part) 1) (car multiplicant-part)]
+      [else multiplicant-part]]))
 
 (define (base power)
   (car power))
