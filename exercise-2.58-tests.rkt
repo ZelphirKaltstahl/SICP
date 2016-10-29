@@ -223,3 +223,27 @@
     "combination does not work correctly")
   (check-equal? (deriv '((10 + 3 * x) + 3 * (x + y + 2)) 'x) 6
     "combination does not work correctly"))
+
+;; ===== last-operation =====
+(test-case
+  "last-operation test case"
+  (check-equal? (last-operation '(x * y + 1)) '+
+    "last-operation selector does not work correctly.")
+  (check-equal? (last-operation '((3 * 4) + 2)) '+
+    "last-operation selector does not work correctly.")
+  (check-equal? (last-operation '(1 + x * y)) '+
+    "lastoperation selector does not work correctly.")
+  (check-equal? (last-operation '(2 + (3 * z))) '+
+    "last-operation selector does not work correctly.")
+  (check-equal?
+    (last-operation '(a + (b * 3 ** 4)))
+    '+
+    "last-operation selector does not work correctly.")
+  (check-equal?
+    (last-operation '(a + b * (3 ** 4)))
+    '+
+    "last-operation selector does not work correctly.")
+  (check-equal?
+    (last-operation '(a + b * 3 ** 4))
+    '+
+    "last-operation selector does not work correctly."))
