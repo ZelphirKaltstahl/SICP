@@ -253,3 +253,15 @@
     (last-operation '(a + b * 3 ** 4))
     '+
     "last-operation selector does not work correctly."))
+
+;; ===== take =====
+(test-case
+  "take test case"
+  (check-equal? (take 0 (list 1 2 3)) '()
+    "take does not work correctly.")
+  (check-equal? (take 4 (list 1 2 3 'a 'b)) (list 1 2 3 'a)
+    "take does not work correctly.")
+  (check-equal? (take 5 (list 1 2 3)) (list 1 2 3)
+    "take does not work correctly.")
+  (check-equal? (take 5 (list 1 2 3 'a 'b)) (list 1 2 3 'a 'b)
+    "take does not work correctly."))

@@ -27,7 +27,23 @@
 ;  exponent
 ;  deriv)
 
-;; GIVEN CODE
+(define (take n a-list)
+  (define (iter counter result sublist)
+;    (display "counter: ") (display counter)
+;    (display "result: ") (display result)
+;    (display "sublist: ") (display sublist)
+    (cond
+      [(empty? sublist) result]
+      [(< counter n)
+        (iter
+          (+ counter 1)
+          (append result (list (car sublist)))
+          (cdr sublist))]
+      [else result]))
+  (cond
+    [(= n 0) '()]
+    [else (iter 0 '() a-list)]))
+
 (define (variable? x) (symbol? x))
 
 (define (same-variable? v1 v2)
@@ -142,10 +158,12 @@
     [(variable? expression)
      (if (same-variable? expression var) 1 0)]
     [(sum? expression)
+     (display "sum recognized") (newline)
      (make-sum
        (deriv (addend expression) var)
        (deriv (augend expression) var))]
     [(product? expression)
+     (display "product recognized") (newline)
      (make-sum
        (make-product
          (multiplier expression)
@@ -154,6 +172,7 @@
          (deriv (multiplier expression) var)
          (multiplicant expression)))]
     [(exponentiation? expression)
+     (display "exponentiation recognized") (newline)
      (make-product                                      ; n*u^(n-1) * u'
        (make-product                                    ; n*u^(n-1)
          (exponent expression)                          ; n
