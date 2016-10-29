@@ -136,6 +136,7 @@
     [else (list base '** exponent)]))
 
 (define (deriv expression var)
+  (display expression) (newline)
   (cond
     [(number? expression) 0]
     [(variable? expression)

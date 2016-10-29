@@ -198,31 +198,37 @@
 (test-case
   "deriv test case"
   (check-equal? (deriv '(x + 3) 'x) 1
-    "test case for simple addition derivate failed")
+    "test case for simple addition derivate failed.")
   (check-equal? (deriv '(x + x + x + x + x) 'x) 5
-    "cannot sum with multiple operands correctly")
+    "cannot sum with multiple operands correctly.")
   (check-equal? (deriv '(2 * 2 * 6 * x) 'x) 24
-    "cannot multiply with multiple operands correctly")
+    "cannot multiply with multiple operands correctly.")
   (check-equal?
     (deriv '((5 * x) + (3 * x) + (4 * x) + (2 * x) + x) 'x)
     15
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal?
     (deriv '((2 * 5 * x) + (3 * x) + (4 * x) + (2 * x) + x) 'x)
     20
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv '(2 + 2 * 5 * x) 'x) 10
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv '((2 * 5 * x) + (3 + 10 * x)) 'x) 20
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv (make-product (make-sum (make-product 10 3) 2) 'x) 'x) 32
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv '((10 * 3 + 2) * x) 'x) '(10 * 3 + 2)
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv '(x + 3 * (x + y + 2)) 'x) 4
-    "combination does not work correctly")
+    "combination does not work correctly.")
   (check-equal? (deriv '((10 + 3 * x) + 3 * (x + y + 2)) 'x) 6
-    "combination does not work correctly"))
+    "combination does not work correctly.")
+  (check-equal?
+    (deriv
+      '(10 + 3 * x + (5 + 4 * y * x))
+      'x)
+    '(3 + (4 * y))
+    "combination does not work correctly."))
 
 ;; ===== last-operation =====
 (test-case
