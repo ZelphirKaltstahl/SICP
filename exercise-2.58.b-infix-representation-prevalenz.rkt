@@ -29,20 +29,27 @@
 
 (define (take n a-list)
   (define (iter counter result sublist)
-;    (display "counter: ") (display counter)
-;    (display "result: ") (display result)
-;    (display "sublist: ") (display sublist)
     (cond
       [(empty? sublist) result]
       [(< counter n)
-        (iter
-          (+ counter 1)
-          (append result (list (car sublist)))
-          (cdr sublist))]
+       (iter
+         (+ counter 1)
+         (append result (list (car sublist)))
+         (cdr sublist))]
       [else result]))
   (cond
     [(= n 0) '()]
     [else (iter 0 '() a-list)]))
+
+(define (take-until a-list stop-elem)
+  (define (iter result sublist)
+    (cond
+      [(empty? sublist) result]
+      [(eq? (car sublist) stop-elem) result]
+      [else (iter (append result (list (car sublist)))
+                  (cdr sublist))]))
+  (iter '() a-list))
+
 
 (define (variable? x) (symbol? x))
 
@@ -113,17 +120,25 @@
     (eq? (last-operation expression) '*)))
 
 (define (addend s)
-  (car s))
+  (let
+    [(raw-addend (take-until s '+))]
+    [if (= (length raw-addend) 1)
+      (car raw-addend)
+      raw-addend]))
 
 (define (augend s)
   (let
     [(augend-part (cdr (memq '+ s)))]
     [if (= (length augend-part) 1)
-      (car augend-part)
-      augend-part]))
+        (car augend-part)
+        augend-part]))
 
-
-(define (multiplier p) (car p))
+(define (multiplier product)
+  (let
+    [(raw-multiplier (take-until product '*))]
+    [if (= (length raw-multiplier) 1)
+        (car raw-multiplier)
+        raw-multiplier]))
 
 (define (multiplicant p)
   (let
