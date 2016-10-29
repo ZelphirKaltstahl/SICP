@@ -85,6 +85,13 @@
      (* m1 m2)]
     [else (list m1 '* m2)]))
 
+(define (make-exponentiation base exponent)
+  (cond
+    [(=number? exponent 1) base]
+    [(=number? exponent 0) 1]
+    [(=number? base 1) 1]
+    [(=number? base 0) 0]
+    [else (list base '** exponent)]))
 
 ;; EXPLANATION
 ;
@@ -118,6 +125,13 @@
   (and
     (list? expression)
     (eq? (last-operation expression) '*)))
+
+(define (exponentiation? expression)
+  (and
+    (list? expression)
+    (eq? (last-operation expression) '**)))
+
+
 
 (define (addend s)
   (let
@@ -153,18 +167,6 @@
 (define (exponent power)
   (caddr power))
 
-(define (exponentiation? expression)
-  (and
-    (list? expression)
-    (eq? (last-operation expression) '**)))
-
-(define (make-exponentiation base exponent)
-  (cond
-    [(=number? exponent 1) base]
-    [(=number? exponent 0) 1]
-    [(=number? base 1) 1]
-    [(=number? base 0) 0]
-    [else (list base '** exponent)]))
 
 (define (deriv expression var)
   (display expression) (newline)
