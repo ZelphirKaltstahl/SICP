@@ -92,5 +92,4 @@
 ;; HOW IT WORKS
 ;
 ; If there are no more elements to recurse on, because total-size is 0, 
-
 (display (list->tree (list 1 3 5 7 9 11)))
