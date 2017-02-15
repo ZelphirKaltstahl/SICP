@@ -117,7 +117,7 @@
 
 (define (encode-symbol a-symbol huffman-tree)
   (define (encode-iter a-symbol subtree path)
-    (display "took path: ") (display path) (newline)
+    ;; (display "took path: ") (display path) (newline)
     (cond
       ;; If the subtree is a leaf, compare the symbols.
       ;; If the symbols are equal, return the path taken so far.
@@ -137,7 +137,7 @@
       ;; Only for the correct path we will get a list of bits.
       ;; That is the list we will return.
       ;; However, this produces 2 procedure calls for each recursion step.
-      ;; This means at worst having the complete tree in form of procedure calls in memory.
+      ;; Evaluation is depth first so we will have height of tree elements in form of procedure calls in memory. We reach a leaf first, then one procedure's context can be taken from the stack, but we enter another branch down to a leaf again.
       [else
         (or
           (encode-iter a-symbol
