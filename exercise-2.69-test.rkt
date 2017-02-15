@@ -1,0 +1,22 @@
+#lang racket
+
+(require rackunit
+         "exercise-2.69-huffman-trees-3.rkt")
+
+(test-case
+  "test case for successive-merge"
+
+  (check-equal?
+    (successive-merge (list (cons 'A 1)
+                            (cons 'C 2)
+                            (cons 'B 3)
+                            (cons 'D 10)))
+    (combine-subtrees
+      (make-leaf 'D 10)
+      (combine-subtrees
+        (make-leaf 'B 3)
+        (combine-subtrees
+          (make-leaf 'C 2)
+          (make-leaf 'A 1))))
+
+    "not working correctly"))
