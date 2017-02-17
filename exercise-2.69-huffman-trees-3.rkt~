@@ -175,3 +175,5 @@
         [updated-ordered-nodes-set (adjoin-set new-node
                                                (cddr ordered-nodes-set))])
        (successive-merge updated-ordered-nodes-set))]))
+
+;; emacs shortcuts: go to matching paren
