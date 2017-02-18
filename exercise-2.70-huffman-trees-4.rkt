@@ -92,7 +92,7 @@
     ;; otherwise get the first pair and insert it in the ordered list
     ;; created from the rest of the pairs (recursively)
     [else (let ([pair (first pairs)])
-               (adjoin-set (make-leaf (first pair) (second pair))
+               (adjoin-set (make-leaf (car pair) (cdr pair))
                            (make-leaf-set (rest pairs))))]))
 
 ;; The behavior of cons is different from append.
@@ -118,19 +118,13 @@
 
 (define (encode-symbol a-symbol huffman-tree)
   (define (encode-iter a-symbol subtree path)
-    ;; (display "took path: ") (display path) (newline)
     (cond
       ;; If the subtree is a leaf, compare the symbols.
       ;; If the symbols are equal, return the path taken so far.
       [(leaf? subtree)
-       ;(display "subtree is a leaf") (newline)
-       ;(display "subtree") (display subtree) (newline)
-       ;(display "searching: ") (display a-symbol) (newline)
-       ;(display "symbol in leaf: ") (display (symbol-leaf subtree)) (newline)
-
-       (if (eq? (symbol-leaf subtree) a-symbol)
-           (reverse path)
-           false)]
+        (if (eq? (symbol-leaf subtree) a-symbol)
+          (reverse path)
+          false)]
       ;; Each symbol can only be once encoded in the tree.
       ;; A path is unique amongst the encodings of symbols.
       ;; Since we return false when a leaf does not contain the symbol we searched for,
@@ -155,13 +149,12 @@
         (error "Symbol not found in tree." a-symbol))))
 
 ;; given in exercise 2.69
-(define (generate-huffman-tree ordered-pairs)
-  (successive-merge (make-leaf-set ordered-pairs)))
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
 
 ;; TASK: write successive-merge
 ;; The procedure shall combine subtrees with the lowest frequency according to Huffman's algorithm.
 (define (successive-merge ordered-nodes-set)
-  (display ordered-nodes-set) (newline)
   (cond
     ;; For an empty set of nodes, we return the empty set.
     [(empty? ordered-nodes-set) nil]
@@ -170,8 +163,62 @@
     ;; Otherwise merge the first two elements into a subtree, since they are the ones with lowest weight.
     [else
      (let*
-       ([new-node (combine-subtrees (first ordered-nodes-set)
-                                    (second ordered-nodes-set))]
+       ([new-node
+          (combine-subtrees
+            ;; Invert second and first here,
+            ;; if you want symbols with high weight to take mostly paths of zero,
+            ;; instead of paths of one.
+            (first ordered-nodes-set)
+            (second ordered-nodes-set))]
         [updated-ordered-nodes-set (adjoin-set new-node
                                                (cddr ordered-nodes-set))])
        (successive-merge updated-ordered-nodes-set))]))
+
+;; TASK: encode
+;; Get a job
+;; Sha na na na na na na na na
+;; Get a job
+;; Sha na na na na na na na na
+;; Wah yip yip yip yip yip yip yip yip yip
+;; Sha boom
+
+;; (define (unique-counts a-symbol-list)
+;;   ;; counts should be a vector, for O(1) access
+;;   (define (iter sublist counts)
+;;     (cond
+;;       ;; if the sublist is empty, return the counts
+;;       [(empty? sublist) counts]
+;;       ;; otherwise increase the count for the current element
+;;       [else
+;;         (iter
+;;           (rest sublist)
+;;           (increase-count-for-elem counts (first sublist)))]))
+;;   (counts-vector-to-list-of-pairs (iter a-symbol-list (vector))))1
+
+;; TODO: simplify into one let*
+(let*
+  ([message
+     (string-replace
+       (string-append
+         "Get a job\n"
+         "Sha na na na na na na na na\n"
+         "Get a job\n"
+         "Sha na na na na na na na na\n"
+         "Wah yip yip yip yip yip yip yip yip yip\n"
+         "Sha boom") "\n" " \n ")]
+    [symbols-message (map string->symbol (string-split (string-upcase message) " "))]
+    ;; this list of count pairs would have to be calculated by the programm actually ...
+    [huffman-tree (generate-huffman-tree (list
+                                           (cons 'BOOM 1)
+                                           (cons 'WAH 1)
+                                           (cons 'A 2)
+                                           (cons 'GET 2)
+                                           (cons 'JOB 2)
+                                           (cons 'SHA 3)
+                                           (cons (string->symbol "\n") 5)
+                                           (cons 'YIP 9)
+                                           (cons 'NA 16)))])
+  (display huffman-tree) (newline)
+  (display (encode symbols-message huffman-tree)) (newline)
+  (display (length (encode symbols-message huffman-tree))) (newline))
+
