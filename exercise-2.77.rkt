@@ -58,22 +58,50 @@
   (define (denom x) (cdr x))
   (define (make-rat n d)
     (let
-      ([(g (gcd n d))])
-      (cons (/ n g) (/ d g))))
+      ([g (gcd n d)])
+      (cons
+        (/ n g)
+        (/ d g))))
   (define (add-rat x y)
-    (make-rat (+ (* (numer x) (denom y))
-                (* (numer y) (denom x)))
-      (* (denom x) (denom y))))
+    (make-rat
+      (+
+        (*
+          (numer x)
+          (denom y))
+        (*
+          (numer y)
+          (denom x)))
+      (*
+        (denom x)
+        (denom y))))
   (define (sub-rat x y)
-    (make-rat (- (* (numer x) (denom y))
-                (* (numer y) (denom x)))
-      (* (denom x) (denom y))))
+    (make-rat
+      (-
+        (*
+          (numer x)
+          (denom y))
+        (*
+          (numer y)
+          (denom x)))
+      (*
+        (denom x)
+        (denom y))))
   (define (mul-rat x y)
-    (make-rat (* (numer x) (numer y))
-      (* (denom x) (denom y))))
+    (make-rat
+      (*
+        (numer x)
+        (numer y))
+      (*
+        (denom x)
+        (denom y))))
   (define (div-rat x y)
-    (make-rat (* (numer x) (denom y))
-      (* (denom x) (numer y))))
+    (make-rat
+      (*
+        (numer x)
+        (denom y))
+      (*
+        (denom x)
+        (numer y))))
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -89,3 +117,8 @@
   'done)
 (define (make-rational n d)
   ((get 'make 'rational) n d))
+
+
+;; COMPLEX NUMBERS
+;; In contrast to rational number and ordinary numbers complex numbers have two separate representations.
+;; This means that this package will be using generic operations, which are generic regarding the fact that there are two representations for complex numbers, but specific to complex numbers.
