@@ -15,6 +15,8 @@
 (define (sub x y) (apply-generic 'sub x y))
 (define (mul x y) (apply-generic 'mul x y))
 (define (div x y) (apply-generic 'div x y))
+(define (equ? x y) (apply-generic 'equ? x y))
+(define (=zero? x) (apply-generic '=zero? x))
 
 ;; Now we do a bottom-up approach by writing the code for the 4 basic operations for the specific representations.
 ;; PLAIN OLD ORDINARY NUMBERS
@@ -38,6 +40,10 @@
     (lambda (x y) (tag (* x y))))
   (put 'div '(scheme-number scheme-number)
     (lambda (x y) (tag (/ x y))))
+  (put 'equ? '(scheme-number scheme-number)
+    (lambda (x y) (= x y)))
+  (put '=zero? '(scheme-number)
+    (lambda (x) (= x 0)))
   ;; We also define a way to create data, which is tagged as data our package understands how to handle.
   (put 'make 'scheme-number
     (lambda (x) (tag x)))
@@ -56,12 +62,14 @@
   ;; internal procedures
   (define (numer x) (car x))
   (define (denom x) (cdr x))
+
   (define (make-rat n d)
     (let
       ([g (gcd n d)])
       (cons
         (/ n g)
         (/ d g))))
+
   (define (add-rat x y)
     (make-rat
       (+
@@ -74,6 +82,7 @@
       (*
         (denom x)
         (denom y))))
+
   (define (sub-rat x y)
     (make-rat
       (-
@@ -86,6 +95,7 @@
       (*
         (denom x)
         (denom y))))
+
   (define (mul-rat x y)
     (make-rat
       (*
@@ -94,6 +104,7 @@
       (*
         (denom x)
         (denom y))))
+
   (define (div-rat x y)
     (make-rat
       (*
@@ -102,6 +113,16 @@
       (*
         (denom x)
         (numer y))))
+
+  (define (equ? ratio1 ratio2)
+    (let
+      ([factor-numer (/ (numer ratio2) (numer ratio1))]
+       [factor-denom (/ (denom ratio2) (denom ratio1))])
+      (= factor-numer factor-denom)))
+
+  (define (=zero? x)
+    (= (numer x) 0))
+
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -114,6 +135,10 @@
     (lambda (x y) (tag (div-rat x y))))
   (put 'make 'rational
     (lambda (n d) (tag (make-rat n d))))
+  (put 'equ? '(rational rational)
+    equ?)
+  (put '=zero? '(rational)
+    =zero?)
   'done)
 (define (make-rational n d)
   ((get 'make 'rational) n d))
@@ -151,6 +176,14 @@
     (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
       (- (angle z1) (angle z2))))
 
+  (define (equ? z1 z2)
+    (and
+      (= (real-part z2) (real-part z1))
+      (= (imag-part z2) (imag-part z1))))
+
+  (define (=zero? z)
+    (= (real-part z) (imag-part z) 0))
+
   ;; interface to rest of the system
   (define (tag z)
     (attach-tag 'complex z))
@@ -167,9 +200,11 @@
     (lambda (x y) (tag (make-from-real-imag x y))))
   (put 'make-from-mag-ang 'complex
     (lambda (r a) (tag (make-from-mag-ang r a))))
-
+  (put 'equ? '(complex complex)
+    equ?)
+  (put '=zero? '(complex)
+    =zero?)
   'done)
-
 
 (define (make-complex-from-real-imag x y)
   ((get 'make-from-real-imag 'complex) x y))
