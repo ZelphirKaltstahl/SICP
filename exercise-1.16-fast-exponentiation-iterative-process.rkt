@@ -24,7 +24,7 @@
 ;; fast recursive
 (define (fast-expt-rec b n)
   (cond
-    ;; neutral element of multiplication is 1
+    ;; neutral element of multiplication is 1, so if the exponent is 0, the result must be 1
     ((= n 0) 1)
     ;; if n is even, simply square the basis to the power of n / 2, because it is the same
     ((even? n) (square (fast-expt-rec b (/ n 2))))
