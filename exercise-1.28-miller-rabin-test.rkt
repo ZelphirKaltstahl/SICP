@@ -24,46 +24,121 @@
 
 
 (define (non-trivial-sqrt-of-one? base exp m)
+  ;; This is the actual test for non-trivial squares of 1 congruent regarding m.
   (cond
-    ((= exp 0) 1)
-    ((even? exp)
-      (remainder
-        (square (non-trivial-sqrt-of-one? base (halve exp) m))  ; here is a trick: The squaring happens outside!
-        m))
-    (else
-      (remainder
-        (* base (non-trivial-sqrt-of-one? base (decrement exp) m))
-        m))))
+    [(= exp 0) 1]
+    [(even? exp)
+     ;; If the exponent is an even number, we can halve it, and the squaring happens outside!
+     ;; Why this is possible? Check the rabin-miller-test.pdf / .odt.
+     (remainder
+      (square
+       (non-trivial-sqrt-of-one? base (halve exp) m))
+      m)]
+    [else
+     ;; in the else branch we take a factor outside instead:
+     (remainder
+      (* base
+         (non-trivial-sqrt-of-one? base (decrement exp) m))
+      m)]))
 
 (define (rabin-miller-test number-to-check a)
-  ; simply call the function with an (n-1) instead of n like with expmod previously
-  (= (non-trivial-sqrt-of-one? a (- number-to-check 1) number-to-check) 1))
+  ;; (display "performing rabin miller test for base = ")
+  ;; (display a)
+  ;; (display " and number = ")
+  ;; (displayln number-to-check)
+  (cond [(> 1 number-to-check) false]
+        [else
+         (= (non-trivial-sqrt-of-one? a (- number-to-check 1) number-to-check)
+            1)]))
 
 (define (check-rabin-miller-all n counter)
-  (if
-   (< counter n)
-   (if (rabin-miller-test n counter)
-     (check-rabin-miller-all n (+ counter 1))
-     false)
-   true))
-
-(define (find-primes-func min max)
-  ;; finds all prime numbers in between min and max (including min and excluding max)
-  (if
-    (< min max)
-    (cond
-      ((check-rabin-miller-all min 2)
-        (begin
-          (display min) (newline)
-          (find-primes (+ min 1) max)))
-      (else
-        (find-primes (next min) max)))
-    (display "finished")))
+  ;; If this procedure returns true, it means the rabin miller test passed for all numbers between counter and n. If counter is 2, then the test guarantees correcly stating whether or not a number is prime.
+  (cond
+    [(< counter n)
+     (if (rabin-miller-test n counter)
+         (check-rabin-miller-all n (+ counter 1))  ; recursion!
+         false)]
+    [else true]))
 
 (define (find-primes min max)
+  (define (find-primes-func min max)
+    ;; finds all prime numbers in between min and max (including min and excluding max)
+    (if (< min max)
+        (cond
+          [(check-rabin-miller-all min 2)
+           ;(display "prime: ") (displayln min)
+           (find-primes (+ min 1) max)]
+          [else
+           (find-primes (next min) max)])
+        (displayln "finished")))
+
   (find-primes-func (next min) max))
 
-(find-primes 0 200)
+
+(define (check-rabin-miller-with-significant-primes potential-prime)
+  ;; It is sufficient to check numbers with the following prime numbers as witnesses up to:
+  ;; n < 3.317.044.064.679.887.385.961.981
+  ;; This number is larger than 64bit integer range.
+  ;; https://en.wikipedia.org/wiki/Miller–Rabin_primality_test
+  (define SIGNIFICANT-PRIMES (list 2 3 5 7 11 13 17 19 23 29 31 37 41))
+  (define (square x) (* x x))
+  (define (halve x) (/ x 2))
+
+  (define (one-rabin-miller-check base exp m)
+    ;; This is the actual test for non-trivial squares of 1 congruent regarding m.
+    (cond
+      [(= exp 0) 1]
+      [(even? exp)
+       ;; If the exponent is an even number, we can halve it, and the squaring happens outside!
+       ;; Why this is possible? Check the rabin-miller-test.pdf / .odt.
+       (remainder (square (one-rabin-miller-check base
+                                                  (halve exp)
+                                                  m))
+                  m)]
+      [else
+       ;; in the else branch we take a factor outside instead:
+       (remainder (* base (one-rabin-miller-check base
+                                                  (decrement exp)
+                                                  m))
+                  m)]))
+
+  ;; This procedure is only for calling one-rabin-miller-check with the correct parameters.
+  (define (rabin-miller-test number-to-check a)
+    (cond
+      [(> 1 number-to-check) false]  ; safeguard against 0 or lower parameter
+      [else
+       (= (one-rabin-miller-check a (- number-to-check 1) number-to-check)
+          1)]))
+
+  (define (iter number-to-check remaining-significant-primes)
+    (cond [(empty? remaining-significant-primes) true]
+          [else
+           (let ([current-significant-prime (first remaining-significant-primes)])
+             (cond [(>= current-significant-prime number-to-check) true]
+                   [(rabin-miller-test number-to-check current-significant-prime)
+                    (iter number-to-check (rest remaining-significant-primes))]
+                   [else false]))]))
+
+  ;; start iterating
+  (iter potential-prime SIGNIFICANT-PRIMES))
+
+(define (find-primes-limited min max)
+  (cond [(< min max)
+         (cond [(check-rabin-miller-with-significant-primes min)
+                ;; test successful, number is prime according to test
+                ;; guaranteed to be true up to:
+                ;; n < 3.317.044.064.679.887.385.961.981
+                (display "prime:")(displayln min)
+                (find-primes-limited (next min) max)]
+               [else
+                ;; test failed, number is not prime
+                ;; (display "number ") (display min) (displayln " failed the test.")
+                (find-primes-limited (next min) max)])]
+        [else
+         (displayln "finished")]))
+
+(time (find-primes 0 10000))
+(time (find-primes-limited 0 10000))
 
 ; carmichael numbers
 ; 561
