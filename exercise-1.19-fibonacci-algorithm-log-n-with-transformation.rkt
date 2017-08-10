@@ -18,6 +18,11 @@
            q
            (- count 1)))))
 
-(+ (fib 9) (fib 10))
-(fib 11)
-(/ (fib 100) (fib 99))
+;; (+ (fib 9) (fib 10))
+;; (fib 11)
+;; (/ (fib 100) (fib 99))
+
+(define (calculate-without-printing n)
+  (fib n)
+  'done)
+(time (calculate-without-printing 100000000))
